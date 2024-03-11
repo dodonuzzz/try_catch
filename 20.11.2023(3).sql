@@ -1,0 +1,46 @@
+USE ETRADE
+SET IDENTITY_INSERT ITEMS_LOG OFF
+
+SET STATISTICS IO ON
+
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+BEGIN TRY
+    BEGIN TRAN
+
+    UPDATE ITEMS SET UNITPRICE = 55 WHERE ID = 3;
+
+    INSERT INTO ITEMS_LOG (ITEMCODE, ITEMNAME, UNITPRICE, CATEGORY1, CATEGORY2, CATEGORY3, CATEGORY4, BRAND) 
+    VALUES (9, 'PÝLLÝ SESLÝ UÇAK', 55.0, 'OYUNCAK','ZEKA GELISTIRICI','OYUNCAKLAR','BEBE OYUNCAK','OYUNCAK')
+
+    -- Eðer buraya ulaþýldýysa, bir hata olmadýðý anlamýna gelir ve COMMIT yapýlabilir
+    COMMIT
+
+    SELECT * FROM ITEMS WHERE ITEMNAME = 'PÝLLÝ SESLÝ UÇAK'
+    SELECT * FROM ITEMS_LOG
+END TRY
+BEGIN CATCH
+    -- Eðer bir hata oluþtuysa, bu blok çalýþýr
+    SELECT ERROR_MESSAGE() AS ErrorMessage;
+    IF (XACT_STATE()) = -1
+    BEGIN
+        PRINT 'The transaction is in an uncommittable state.' + ' Rolling back transaction.'
+        ROLLBACK TRANSACTION;
+    END;
+END CATCH
+
+
+
+TRUNCATE TABLE ITEMS_LOG
+
+SELECT * FROM ITEMS_LOG
+
+
+
+
+
+
+
+
+
+
